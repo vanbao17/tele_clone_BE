@@ -48,11 +48,13 @@ class RegisterController extends Controller
 
         if ($emailExists) {
             return response()->json([
-                'message' => 'Email đã tồn tại trong hệ thống.'
+                'message' => 'Email đã tồn tại trong hệ thống.',
+                "status"=> 201,
             ], 201);
         }
         return response()->json([
-            'message' => 'Email hợp lệ và chưa được sử dụng.'
+            'message' => 'Email hợp lệ và chưa được sử dụng.',
+            "status"=> 200,
         ], 200);
     }
 }

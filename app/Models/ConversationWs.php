@@ -12,16 +12,9 @@ class ConversationWs extends Model
     protected $table = 'conversation_ws';
 
     protected $fillable = [
-        'id_owner', 'name', 'thumb'
+        'id_owner',
+        'name',
+        'thumb',
+        'is_deleted',
     ];
-
-    public function owner()
-    {
-        return $this->belongsTo(User::class, 'id_owner');
-    }
-
-    public function members()
-    {
-        return $this->hasMany(ConversationMember::class, 'id_conversation');
-    }
 }
