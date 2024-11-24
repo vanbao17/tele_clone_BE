@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\ConversationController;
 use App\Http\Controllers\Api\ConversationMemberController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -18,7 +19,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\RegisterController;
 use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\ConversationWsController;
+use App\Http\Controllers\API\MessageController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\MessageWsController;
 
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/register', [RegisterController::class, 'register']);
@@ -33,6 +36,24 @@ Route::post('/conversation-member/add', [ConversationMemberController::class, 'a
 Route::delete('/conversation-member/remove', [ConversationMemberController::class, 'removeMember']);
 Route::get('/conversation-member/get-members', [ConversationMemberController::class, 'getMembers']);
 Route::post('/conversations-ws', [ConversationMemberController::class, 'index']);
+
+Route::get('/conversationUser/{id}', [ConversationController::class, 'index']);
+Route::post('/conversationUser', [ConversationController::class, 'store']);
+Route::get('/conversationUser/detail/{id}', [ConversationController::class, 'show']);
+Route::delete('/conversationUser/{id}', [ConversationController::class, 'destroy']);
+Route::prefix('messages')->group(function () {
+    Route::get('{conversationId}', [MessageController::class, 'index']);  // Lấy tất cả tin nhắn của một cuộc trò chuyện
+    Route::post('', [MessageController::class, 'store']);  // Tạo tin nhắn mới
+    Route::patch('{messageId}/read', [MessageController::class, 'markAsRead']);  // Đánh dấu là đã đọc
+    Route::patch('{messageId}/delete', [MessageController::class, 'delete']);  // Xóa tin nhắn (đánh dấu là xóa)
+    Route::delete('{messageId}', [MessageController::class, 'destroy']);  // Xóa hoàn toàn tin nhắn
+});
+Route::prefix('messagesws')->group(function () {
+    Route::get('{conversationWsId}', [MessageWsController::class, 'index']);  
+    Route::post('/', [MessageWsController::class, 'store']);  
+    Route::put('{id}', [MessageWsController::class, 'update']);  
+    Route::delete('{id}', [MessageWsController::class, 'destroy']);  
+});
 Route::get('/users/search', [UserController::class, 'search']);
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

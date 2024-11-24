@@ -9,15 +9,24 @@ class Conversation extends Model
 {
     use HasFactory;
 
+    // Tên bảng
     protected $table = 'conversation';
 
+    // Chỉ định các cột có thể được thêm hoặc sửa đổi
     protected $fillable = [
-        'id_account1', 'id_account2'
+        'id_account1',
+        'id_account2',
+        'is_deleted',
     ];
 
-    public function users()
-    {
-        return $this->belongsToMany(User::class, 'conversation_member', 'id_conversation', 'id_user')
-                    ->where('is_deleted', 0);
-    }
+    // Định nghĩa các kiểu dữ liệu
+    protected $casts = [
+        'is_deleted' => 'boolean',
+    ];
+
+    // Ẩn các trường không cần thiết khi trả về JSON
+    protected $hidden = [
+        'created_date',
+        'updated_date',
+    ];
 }
