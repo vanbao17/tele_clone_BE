@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\ConversationMemberController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -28,8 +29,10 @@ Route::get('/conversations/{id}', [ConversationWsController::class, 'show']);
 Route::put('/conversations/{id}', [ConversationWsController::class, 'update']); 
 Route::delete('/conversations/{id}', [ConversationWsController::class, 'destroy']); 
 Route::patch('conversations/{id}/rename', [ConversationWsController::class, 'rename']);
-
-
+Route::post('/conversation-member/add', [ConversationMemberController::class, 'addMember']);
+Route::delete('/conversation-member/remove', [ConversationMemberController::class, 'removeMember']);
+Route::get('/conversation-member/get-members', [ConversationMemberController::class, 'getMembers']);
+Route::post('/conversations-ws', [ConversationMemberController::class, 'index']);
 Route::get('/users/search', [UserController::class, 'search']);
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

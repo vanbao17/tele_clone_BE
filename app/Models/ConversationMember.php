@@ -11,14 +11,7 @@ class ConversationMember extends Model
 
     protected $table = 'conversation_member';
 
-    protected $fillable = [
-        'id_conversation', 'id_user', 'role'
-    ];
-
-    public function conversation()
-    {
-        return $this->belongsTo(ConversationWs::class, 'id_conversation');
-    }
+    protected $fillable = ['id_conversation', 'id_user', 'role'];
 
     public function user()
     {

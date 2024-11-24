@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\ConversationMember;
 use App\Models\ConversationWs;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ConversationWsController extends Controller
@@ -19,31 +21,47 @@ class ConversationWsController extends Controller
     // 2. Create a new conversation
     public function store(Request $request)
     {
-        // Log thông tin ban đầu
-        Log::info('Store conversation request received', [
-            'request_data' => $request->all()  // Log toàn bộ dữ liệu request
-        ]);
-        
-        // Validate dữ liệu
-        $validated = $request->validate([
-            'id_owner' => 'required|exists:users,id',
-            'name' => 'required|string|max:100',
-            'thumb' => 'nullable|string',
-        ]);
+    // Log thông tin ban đầu
+    Log::info('Store conversation request received', [
+        'request_data' => $request->all()  // Log toàn bộ dữ liệu request
+    ]);
 
-        // Log thông tin sau khi validate
-        Log::info('Data validated', [
-            'validated_data' => $validated  // Log dữ liệu đã qua validate
-        ]);
+    // Validate dữ liệu
+    $validated = $request->validate([
+        'id_owner' => 'required|exists:users,id',
+        'name' => 'required|string|max:100',
+        'thumb' => 'nullable|string',
+    ]);
 
+    DB::beginTransaction(); // Bắt đầu transaction
+
+    try {
         // Tạo conversation
         $conversation = ConversationWs::create($validated);
 
         // Log thông tin conversation đã được tạo
         Log::info('Conversation created successfully', [
-            'conversation_id' => $conversation->id,  // Log ID của conversation mới tạo
-            'conversation_name' => $conversation->name,  // Log tên của conversation
+            'conversation_id' => $conversation->id,
+            'conversation_name' => $conversation->name,
         ]);
+
+        // Thêm người tạo vào bảng conversation_member
+        $conversationMember = [
+            'id_conversation' => $conversation->id,
+            'id_user' => $validated['id_owner'],
+            'role' => 'admin', // Người tạo sẽ là admin
+        ];
+
+        ConversationMember::create($conversationMember);
+
+        // Log thông tin thành viên đã được thêm
+        Log::info('Conversation member added successfully', [
+            'conversation_id' => $conversation->id,
+            'user_id' => $validated['id_owner'],
+            'role' => 'admin',
+        ]);
+
+        DB::commit(); // Hoàn tất transaction
 
         // Trả về response
         return response()->json([
@@ -51,7 +69,18 @@ class ConversationWsController extends Controller
             'conversation' => $conversation,
             'status' => 200
         ], 201);
+    } catch (\Exception $e) {
+        DB::rollBack(); // Hoàn tác transaction nếu lỗi xảy ra
+        Log::error('Error creating conversation or adding member', [
+            'error_message' => $e->getMessage(),
+        ]);
+
+        return response()->json([
+            'message' => 'Failed to create conversation',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
 
     // 3. Show a specific conversation
     public function show($id)
