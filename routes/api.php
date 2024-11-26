@@ -23,7 +23,7 @@ use App\Http\Controllers\API\MessageController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\MessageWsController;
 
-Route::post('/login', [LoginController::class, 'login']);
+Route::post('/login', [LoginController::class, 'login'])->name('login');
 Route::post('/register', [RegisterController::class, 'register']);
 Route::post('/check-email', [RegisterController::class, 'checkEmail']);
 Route::get('/conversations', [ConversationWsController::class, 'index']);

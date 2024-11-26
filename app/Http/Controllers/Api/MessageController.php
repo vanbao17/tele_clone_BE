@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Message;
 use Illuminate\Http\Request;
+use App\Events\MessageSent;
 
 class MessageController extends Controller
 {
@@ -40,6 +41,7 @@ class MessageController extends Controller
             'content_type' => $request->content_type,
             'content' => $request->content,
         ]);
+        broadcast(new MessageSent($message))->toOthers();
 
         return response()->json($message, 201);
     }
