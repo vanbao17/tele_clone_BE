@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\MessageWs;
 use Illuminate\Http\Request;
+use App\Events\GroupMessageSent;
 
 class MessageWsController extends Controller
 {
@@ -31,6 +32,7 @@ class MessageWsController extends Controller
 
         $message = MessageWs::create($request->all());
 
+        broadcast(new GroupMessageSent($message))->toOthers();
         return response()->json($message, 201); 
     }
 
