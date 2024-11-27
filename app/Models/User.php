@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-class User extends Authenticatable
+use App\Notifications\VerifyEmailCustom;
+
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory,HasApiTokens, Notifiable;
 
@@ -23,4 +25,17 @@ class User extends Authenticatable
 
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
+
+    // public function sendEmailVerificationNotification()
+    // {
+    //     $this->notify(new VerifyEmailCustom());
+    // }
+    public function markEmailAsVerified()
+    {
+        $this->forceFill([
+            'email_verified_at' => $this->freshTimestamp(),
+        ])->save();
+
+        return true;
+    }
 }
