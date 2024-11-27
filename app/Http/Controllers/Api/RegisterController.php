@@ -26,19 +26,21 @@ class RegisterController extends Controller
         if ($emailExists) {
             return response()->json(['message' => 'Email đã tồn tại trong hệ thống.'], 409); // Trả về mã lỗi 409 nếu email trùng
         }
-        
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
-        $token = $user->createToken('YourAppName')->plainTextToken;
+
+        $user->sendEmailVerificationNotification();
+
         return response()->json([
-            'message' => 'User registered successfully',
+            'message' => 'User registered successfully. Please verify your email before logging in.',
             'user' => $user,
-            'token' => $token
         ], 201);
     }
+
     public function checkEmail(Request $request)
     {
         $request->validate([

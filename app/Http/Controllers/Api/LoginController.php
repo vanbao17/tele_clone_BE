@@ -22,6 +22,10 @@ class LoginController extends Controller
         }
         $token = $user->createToken('YourAppName')->plainTextToken;
 
+        if (!$user->hasVerifiedEmail()) {
+            return response()->json(['message' => 'Please verify your email before logging in.'], 403);
+        }    
+
         return response()->json([
             'message' => 'Đăng nhập thành công',
             'token' => $token
