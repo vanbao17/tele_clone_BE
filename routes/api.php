@@ -37,7 +37,8 @@ Route::get('/email/verify/{id}/{hash}', function ($id, $hash) {
         event(new Verified($user));
     }
 
-    return response()->json(['message' => 'Email verified successfully.']);
+     // Chuyển hướng đến trang verify-successful
+     return redirect('http://localhost:3000/verify-successful');
 })->name('verification.verify');
 
 // Protected routes requiring verified email
