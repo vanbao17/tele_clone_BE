@@ -27,5 +27,20 @@ Broadcast::channel('group-chat.{id_conversation_ws}', function ($user, $id_conve
         ->where('id_conversation', $id_conversation_ws)
         ->exists();
 });
+Broadcast::channel('user-group-typing.{id_conversation_ws}', function ($user, $id_conversation_ws) {
+    return DB::table('conversation_member')
+        ->where('id_user', $user->id)
+        ->where('id_conversation', $id_conversation_ws)
+        ->exists();
+});
+Broadcast::channel('user-typing.{id_conversation}', function ($user, $id_conversation) {
+    return DB::table('conversation')
+            ->where('id', $id_conversation)
+            ->where(fn($q) => $q->where('id_account1', $user->id)
+                                ->orWhere('id_account2', $user->id))
+            ->exists();
+});
+
+
 
 

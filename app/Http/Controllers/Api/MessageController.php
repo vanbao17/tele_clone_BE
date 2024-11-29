@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Message;
 use Illuminate\Http\Request;
 use App\Events\MessageSent;
+use App\Events\MessageRetracted;
 
 class MessageController extends Controller
 {
@@ -41,7 +42,7 @@ class MessageController extends Controller
             'content_type' => $request->content_type,
             'content' => $request->content,
         ]);
-        broadcast(new MessageSent($message))->toOthers();
+        broadcast(new MessageSent($message, 'created'))->toOthers();
 
         return response()->json($message, 201);
     }
@@ -60,14 +61,31 @@ class MessageController extends Controller
     {
         $message = Message::findOrFail($messageId);
         $message->update(['is_deleted' => true]);
-
         return response()->json(['message' => 'Message deleted successfully']);
     }
+    public function update(Request $request, $messageId)
+    {
+        $request->validate([
+            'content' => 'required|string',
+        ]);
+        $message = Message::findOrFail($messageId);
+        if (!$message) {
+            return response()->json(['message' => 'Tin nhắn không tồn tại.'], 404);
+        }
+        $message->content = $request->content;
+        $message->save();
+        broadcast(new MessageSent($message, 'updated'))->toOthers();
 
+        return response()->json([
+            'message' => 'Tin nhắn đã được cập nhật.',
+            'data' => $message
+        ]);
+    }
     // Xóa hoàn toàn tin nhắn (không thể phục hồi)
     public function destroy($messageId)
     {
         $message = Message::findOrFail($messageId);
+        broadcast(new MessageSent($message, 'deleted'))->toOthers();
         $message->delete();
 
         return response()->json(['message' => 'Message permanently deleted']);

@@ -32,20 +32,21 @@ class MessageWsController extends Controller
 
         $message = MessageWs::create($request->all());
 
-        broadcast(new GroupMessageSent($message))->toOthers();
+        broadcast(new GroupMessageSent($message, 'created'))->toOthers();
         return response()->json($message, 201); 
     }
 
     // Cập nhật tin nhắn (giả sử bạn chỉ cập nhật content)
-    public function update(Request $request, $id)
+    public function update(Request $request, $messageId)
     {
         $request->validate([
             'content' => 'required|string',
         ]);
 
-        $message = MessageWs::findOrFail($id);
+        $message = MessageWs::findOrFail($messageId);
         $message->content = $request->content;
         $message->save();
+        broadcast(new GroupMessageSent($message, 'updated'))->toOthers();
 
         return response()->json($message);
     }
@@ -54,8 +55,8 @@ class MessageWsController extends Controller
     public function destroy($id)
     {
         $message = MessageWs::findOrFail($id);
-        $message->is_deleted = true;
-        $message->save();
+        broadcast(new GroupMessageSent($message, 'deleted'))->toOthers();
+        $message->delete();
 
         return response()->json(null, 204);
     }

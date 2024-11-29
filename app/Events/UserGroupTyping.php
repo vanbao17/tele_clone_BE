@@ -10,18 +10,23 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class GroupMessageSent  implements ShouldBroadcast
+class UserGroupTyping implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
-    public $message;
-    public $action; 
+
+    public $sender_id;
+    public $id_conversation_ws;
+    public $isTyping;
     /**
      * Create a new event instance.
+     *
+     * 
      */
-    public function __construct($message, $action = 'created')
+    public function __construct($sender_id , $id_conversation_ws, $isTyping)
     {
-        $this->message = $message;
-        $this->action = $action;
+        $this->sender_id = $sender_id;
+        $this->id_conversation_ws = $id_conversation_ws;
+        $this->isTyping = $isTyping;
     }
 
     /**
@@ -31,15 +36,16 @@ class GroupMessageSent  implements ShouldBroadcast
      */
     public function broadcastOn(): array
     {
-        return [
-            new PresenceChannel('group-chat.' . $this->message->id_conversation_ws),
-        ];
+        return [ new PresenceChannel('user-group-typing.' . $this->id_conversation_ws) ];
     }
-
-    public function broadcastWith(){
+    /**
+     * Broadcast data with action.
+     */
+    public function broadcastWith()
+    {
         return [
-            'action' => $this->action,
-            'message'=>$this->message
+            'isTyping' => $this->isTyping,
+            'sender_id' => $this->sender_id,
         ];
     }
 }
