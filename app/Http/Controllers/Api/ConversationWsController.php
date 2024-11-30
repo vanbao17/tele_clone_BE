@@ -8,7 +8,7 @@ use App\Models\ConversationWs;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Events\UserGroupTyping;
+use App\Events\GroupStatus;
 
 class ConversationWsController extends Controller
 {
@@ -157,20 +157,17 @@ class ConversationWsController extends Controller
             'conversation' => $conversation
         ]);
     }
-    public function typingStatus(Request $request)
+    public function groupStatus(Request $request)
     {
         $validatedData = $request->validate([
             'sender_id' => 'required|integer|exists:users,id', 
             'id_conversation_ws' => 'required|integer|exists:conversation_ws,id', 
             'isTyping' => 'required|boolean', 
         ]);
-
         $sender_id = $validatedData['sender_id'];
         $id_conversation_ws = $validatedData['id_conversation_ws'];
         $isTyping = $validatedData['isTyping'];
-
-        
-        broadcast(new UserGroupTyping($sender_id, $id_conversation_ws, $isTyping))->toOthers();
+        broadcast(new GroupStatus($sender_id, $id_conversation_ws, $isTyping))->toOthers();
         return response()->json(['status' => 'Typing status broadcasted']);
     }
 }
