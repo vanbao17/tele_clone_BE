@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Events\UserTyping;
 use App\Events\UserGroupTyping;
+use App\Events\UserStatus;
 
 class ConversationController extends Controller
 {
@@ -92,7 +93,7 @@ class ConversationController extends Controller
         $conversation->update(['is_deleted' => true]);
         return response()->json(['message' => 'Conversation deleted']);
     }
-    public function typingStatus(Request $request)
+    public function userStatus(Request $request)
     {
         $validatedData = $request->validate([
             'sender_id' => 'required|integer|exists:users,id', 
@@ -104,7 +105,7 @@ class ConversationController extends Controller
         $id_conversation = $validatedData['id_conversation'];
         $isTyping = $validatedData['isTyping'];
 
-        broadcast(new UserTyping($sender_id, $id_conversation, $isTyping))->toOthers();
+        broadcast(new UserStatus($sender_id, $id_conversation, $isTyping))->toOthers();
 
         return response()->json(['status' => 'Typing status broadcasted']);
     }

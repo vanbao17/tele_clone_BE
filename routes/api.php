@@ -29,7 +29,7 @@ Route::post('/register', [RegisterController::class, 'register']);
 Route::post('/check-email', [RegisterController::class, 'checkEmail']);
 
 Route::get('/conversations', [ConversationWsController::class, 'index']);
-Route::post('/conversations/typing-status', [ConversationWsController::class, 'typingStatus']);
+Route::post('/conversations/group-status', [ConversationWsController::class, 'groupStatus']);
 Route::post('/conversations', [ConversationWsController::class, 'store']);
 Route::get('/conversations/{id}', [ConversationWsController::class, 'show']); 
 Route::put('/conversations/{id}', [ConversationWsController::class, 'update']); 
@@ -40,7 +40,7 @@ Route::delete('/conversation-member/remove', [ConversationMemberController::clas
 Route::get('/conversation-member/get-members', [ConversationMemberController::class, 'getMembers']);
 Route::post('/conversations-ws', [ConversationMemberController::class, 'index']);
 
-Route::post('/conversationUser/typing-status', [ConversationController::class, 'typingStatus']);
+Route::post('/conversationUser/user-status', [ConversationController::class, 'userStatus']);
 Route::get('/conversationUser/{id}', [ConversationController::class, 'index']);
 Route::post('/conversationUser', [ConversationController::class, 'store']);
 Route::post('/conversationUser/typing-status', [ConversationController::class, 'typingStatus']);

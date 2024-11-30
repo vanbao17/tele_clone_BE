@@ -10,21 +10,22 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class UserTyping implements ShouldBroadcast
+class GroupStatus implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
+
     public $sender_id;
-    public $id_conversation;
+    public $id_conversation_ws;
     public $isTyping;
     /**
      * Create a new event instance.
      *
-     * @return void
+     * 
      */
-    public function __construct($sender_id , $id_conversation, $isTyping)
+    public function __construct($sender_id , $id_conversation_ws, $isTyping)
     {
         $this->sender_id = $sender_id;
-        $this->id_conversation = $id_conversation;
+        $this->id_conversation_ws = $id_conversation_ws;
         $this->isTyping = $isTyping;
     }
 
@@ -33,9 +34,9 @@ class UserTyping implements ShouldBroadcast
      *
      * @return array<int, \Illuminate\Broadcasting\Channel>
      */
-    public function broadcastOn() : array
+    public function broadcastOn(): array
     {
-        return [ new PrivateChannel('user-typing.' . $this->id_conversation) ];
+        return [ new PresenceChannel('group-status.' . $this->id_conversation_ws) ];
     }
     /**
      * Broadcast data with action.
