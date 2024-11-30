@@ -18,9 +18,13 @@ class LoginController extends Controller
         $user = User::where('email', $validatedData['email'])->first();
 
         if (!$user || !Hash::check($validatedData['password'], $user->password)) {
-            return response()->json(['message' => 'Thông tin đăng nhập không hợp lệ'], 401);
+            return response()->json(['message' => 'Thông tin đăng nhập không hợp lệ', 'status' => 401], 401);
         }
         $token = $user->createToken('YourAppName')->plainTextToken;
+
+        if (!$user->hasVerifiedEmail()) {
+            return response()->json(['message' => 'Please verify your email before logging in.', 'status' => 403], 403);
+        }    
 
         return response()->json([
             'message' => 'Đăng nhập thành công',

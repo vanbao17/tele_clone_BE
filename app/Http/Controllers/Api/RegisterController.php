@@ -26,19 +26,51 @@ class RegisterController extends Controller
         if ($emailExists) {
             return response()->json(['message' => 'Email đã tồn tại trong hệ thống.'], 409); // Trả về mã lỗi 409 nếu email trùng
         }
-        
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
-        $token = $user->createToken('YourAppName')->plainTextToken;
+
+        $user->sendEmailVerificationNotification();
+
         return response()->json([
-            'message' => 'User registered successfully',
+            'message' => 'User registered successfully. Please verify your email before logging in.',
             'user' => $user,
-            'token' => $token
         ], 201);
     }
+    public function register_verify(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        }
+
+        $emailExists = User::where('email', $request->email)->exists();
+
+        if ($emailExists) {
+            return response()->json(['message' => 'Email đã tồn tại trong hệ thống.'], 409);
+        }
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'email_verified_at' => now(),
+        ]);
+
+        return response()->json([
+            'message' => 'User registered successfully.',
+            'user' => $user,
+        ], 201);
+    }
+
     public function checkEmail(Request $request)
     {
         $request->validate([

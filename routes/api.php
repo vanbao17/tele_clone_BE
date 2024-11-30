@@ -1,10 +1,9 @@
 <?php
-
 use App\Http\Controllers\Api\ConversationController;
 use App\Http\Controllers\Api\ConversationMemberController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
+ 
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -15,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
+ 
 use App\Http\Controllers\Api\RegisterController;
 use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\ConversationWsController;
@@ -23,11 +22,56 @@ use App\Http\Controllers\API\MessageController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\MessageWsController;
 use App\Http\Controllers\Api\ResetPasswordController;
+use Illuminate\Auth\Events\Verified;
 
-Route::post('/login', [LoginController::class, 'login'])->name('login');
+// Auth routes
+Route::post('/login', [LoginController::class, 'login']);
 Route::post('/register', [RegisterController::class, 'register']);
+Route::post('/register_verify', [RegisterController::class, 'register_verify']);
 Route::post('/check-email', [RegisterController::class, 'checkEmail']);
 
+// Password reset routes
+Route::post('/forgot-password', [ResetPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::post('/password/reset', [ResetPasswordController::class, 'reset'])->name('password.reset');
+
+// Email verification routes
+Route::middleware('auth:api')->group(function () {
+    // Send email verification notification
+    Route::post('/email/verification-notification', function (Request $request) {
+        $request->user()->sendEmailVerificationNotification();
+        return response()->json(['message' => 'Verification link sent!']);
+    })->middleware('throttle:6,1')->name('verification.send');
+});
+
+// Verify email route
+Route::get('/email/verify/{id}/{hash}', function ($id, $hash) {
+    $user = \App\Models\User::findOrFail($id);
+
+    if (!hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
+        return response()->json(['message' => 'Invalid verification link.'], 403);
+    }
+
+    if ($user->markEmailAsVerified()) {
+        event(new Verified($user));
+    }
+
+     // Chuyển hướng đến trang verify-successful
+     return redirect('http://localhost:3000/verify-successful');
+})->name('verification.verify');
+
+
+Route::middleware(['auth:api', 'verified'])->group(function () {
+    // Lấy thông tin user đã đăng nhập
+    Route::get('/user', function (Request $request) {
+        return response()->json($request->user());
+    });
+ 
+    // Một route bảo vệ khác
+    Route::get('/protected-route', function () {
+        return response()->json(['message' => 'This is a verified route']);
+    });
+});
+ 
 Route::get('/conversations', [ConversationWsController::class, 'index']);
 Route::post('/conversations/group-status', [ConversationWsController::class, 'groupStatus']);
 Route::post('/conversations', [ConversationWsController::class, 'store']);
