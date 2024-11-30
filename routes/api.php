@@ -22,10 +22,12 @@ use App\Http\Controllers\Api\ConversationWsController;
 use App\Http\Controllers\API\MessageController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\MessageWsController;
+use App\Http\Controllers\Api\ResetPasswordController;
 
 Route::post('/login', [LoginController::class, 'login'])->name('login');
 Route::post('/register', [RegisterController::class, 'register']);
 Route::post('/check-email', [RegisterController::class, 'checkEmail']);
+
 Route::get('/conversations', [ConversationWsController::class, 'index']);
 Route::post('/conversations/typing-status', [ConversationWsController::class, 'typingStatus']);
 Route::post('/conversations', [ConversationWsController::class, 'store']);
@@ -59,6 +61,8 @@ Route::prefix('messagesws')->group(function () {
     Route::delete('{id}', [MessageWsController::class, 'destroy']);  
 });
 Route::get('/users/search', [UserController::class, 'search']);
+Route::post('forgot-password', [ResetPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.reset');
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
