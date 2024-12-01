@@ -119,3 +119,18 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //     Route::put('/{id}', [ConversationWsController::class, 'update']); 
 //     Route::delete('/{id}', [ConversationWsController::class, 'destroy']); 
 // });
+
+
+
+Route::prefix('crud-user')->group(function () {
+    // Lấy danh sách tất cả người dùng (có thể truy cập bởi tất cả người dùng đã đăng nhập)
+    Route::get('/users', [UserController::class, 'index']);
+    Route::get('/users/{id}', [UserController::class, 'show']);
+    // Các endpoint chỉ dành cho admin
+    Route::post('/users', [UserController::class, 'store']); // Create user
+    Route::put('/users/{id}', [UserController::class, 'update']); // Update user
+    Route::delete('/users/{id}', [UserController::class, 'destroy']); // Delete user
+    Route::get('/users/trashed/all', [UserController::class, 'getTrashed']);
+    Route::put('/users/restore/{id}', [UserController::class, 'restore']);
+
+});
