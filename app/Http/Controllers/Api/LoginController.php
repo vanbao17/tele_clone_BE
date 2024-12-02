@@ -32,4 +32,35 @@ class LoginController extends Controller
             'user'=>$user
         ], 200);
     }
+
+    // Hàm xác thực token và trả về thông tin người dùng
+    public function checkTokenAndReturnUser(Request $request)
+    {
+        // Lấy token từ header Authorization
+        $token = $request->bearerToken();
+
+        // Nếu không có token trong header
+        if (!$token) {
+            return response()->json(['message' => 'Token không được cung cấp.'], 401);
+        }
+
+        // Xác thực token qua Sanctum và lấy user
+        try {
+            // Lấy thông tin người dùng từ token
+            $user = Auth::guard('sanctum')->user();
+
+            // Kiểm tra nếu token không hợp lệ hoặc hết hạn
+            if (!$user) {
+                return response()->json(['message' => 'Token không hợp lệ hoặc hết hạn.'], 401);
+            }
+
+            // Trả về người dùng nếu token hợp lệ
+            return response()->json(['user' => $user]);
+
+        } catch (\Exception $e) {
+            // Xử lý lỗi nếu có vấn đề khi xác thực
+            return response()->json(['message' => 'Đã xảy ra lỗi trong quá trình xác thực.'], 500);
+        }
+    }
+    
 }

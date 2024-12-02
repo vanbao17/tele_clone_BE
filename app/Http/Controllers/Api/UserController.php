@@ -155,4 +155,76 @@ public function restore($id)
         'data' => $user,
     ]);
 }
+
+
+
+// Upload ảnh và lưu vào imgUrl
+public function uploadFile(Request $request, $id)
+{
+    // Kiểm tra xem người dùng có tồn tại hay không
+    $user = User::find($id);
+    if (!$user) {
+        return response()->json(['error' => 'User not found'], 404);
+    }
+
+    // Kiểm tra xem có file trong request không
+    if ($request->hasFile('file')) {
+        // Lấy file từ request
+        $file = $request->file('file');
+        
+        // Kiểm tra định dạng file
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+        $extension = $file->getClientOriginalExtension();
+        if (!in_array($extension, $allowedExtensions)) {
+            return response()->json(['error' => 'Invalid file format'], 400);
+        }
+
+        // Lưu file vào thư mục public/uploads
+        $path = $file->storeAs('public/uploads', $file->getClientOriginalName());
+
+        // Tạo URL của file theo localhost:3000
+        $url = env('APP_SERVER') . '/storage/uploads/' . $file->getClientOriginalName();
+
+        // Cập nhật để khi truy cập vào url trả về ảnh trên trang web
+        // $url = str_replace('public/', '', $url);
+
+
+        // Cập nhật trường imgUrl của người dùng
+        $user->imgUrl = $url;
+        $user->save();
+
+        // Trả về thông báo thành công và URL của file đã upload
+        return response()->json(['message' => 'File uploaded successfully', 'imgUrl' => $url], 200);
+    } else {
+        return response()->json(['error' => 'No file provided'], 400);
+    }
+}
+
+
+
+   // Cập nhật thông tin người dùng (tên, email, số điện thoại)
+   public function updateUserInfo(Request $request, $id)
+   {
+       $request->validate([
+           'name' => 'required|string|max:255',
+           'phoneNumber' => 'required|string|max:15',
+       ]);
+   
+       // Lấy người dùng theo ID
+       $user = User::findOrFail($id); // Nếu không tìm thấy, trả về lỗi 404
+       
+       Log::info('Updating phone number: ' . $request->phoneNumber);
+       // Cập nhật thông tin người dùng
+       $user->update([
+           'name' => $request->name,
+           'phoneNumber' => $request->phoneNumber,
+       ]);
+   
+       return response()->json([
+           'message' => 'User information updated successfully',
+           'user' => $user,
+       ], 200);
+   }
+
+
 }

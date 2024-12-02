@@ -134,3 +134,11 @@ Route::prefix('crud-user')->group(function () {
     Route::put('/users/restore/{id}', [UserController::class, 'restore']);
 
 });
+
+
+Route::middleware('auth:sanctum')->group(function () {
+    // Cập nhật thông tin người dùng theo ID
+    Route::put('update-info/{id}', [UserController::class, 'updateUserInfo']);
+    Route::post('upload-file/{id}', [UserController::class, 'uploadFile']);
+    Route::get('/checkUser/user', [LoginController::class, 'checkTokenAndReturnUser']);
+});
