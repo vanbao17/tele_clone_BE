@@ -190,6 +190,7 @@ public function uploadFile(Request $request, $id)
 
 
         // Cập nhật trường imgUrl của người dùng
+        $user->thumb = $url;
         $user->imgUrl = $url;
         $user->save();
 
