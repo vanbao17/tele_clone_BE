@@ -80,8 +80,11 @@ Route::put('/conversations/{id}', [ConversationWsController::class, 'update']);
 Route::delete('/conversations/{id}', [ConversationWsController::class, 'destroy']); 
 Route::patch('conversations/{id}/rename', [ConversationWsController::class, 'rename']);
 Route::post('/conversation-member/add', [ConversationMemberController::class, 'addMember']);
+Route::post('/conversation-member/add-multi-members', [ConversationMemberController::class, 'addMultipleMembers']);
 Route::delete('/conversation-member/remove', [ConversationMemberController::class, 'removeMember']);
+Route::delete('/conversation-member/remove-multi-members', [ConversationMemberController::class, 'removeMultipleMembers']);
 Route::get('/conversation-member/get-members', [ConversationMemberController::class, 'getMembers']);
+
 Route::post('/conversations-ws', [ConversationMemberController::class, 'index']);
 
 Route::post('/conversationUser/user-status', [ConversationController::class, 'userStatus']);

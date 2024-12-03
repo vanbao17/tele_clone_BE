@@ -59,6 +59,53 @@ class ConversationMemberController extends Controller
             'status' => 200
         ], 201);
     }
+
+
+    public function addMultipleMembers(Request $request)
+{
+    // Xác thực yêu cầu
+    $request->validate([
+        'id_conversation' => 'required|exists:conversation_ws,id',
+        'id_users' => 'required|array', // Đảm bảo 'id_users' là một mảng
+        'id_users.*' => 'required|exists:users,id', // Mỗi phần tử trong mảng phải tồn tại trong bảng users
+    ]);
+
+    // Lấy danh sách các id_user từ request
+    $idUsers = $request->id_users;
+    $idConversation = $request->id_conversation;
+
+    // Mảng để lưu các thành viên mới
+    $newMembers = [];
+
+    // Thêm từng user vào conversation
+    foreach ($idUsers as $idUser) {
+        // Kiểm tra nếu user đã là thành viên để tránh thêm trùng lặp
+        $existingMember = ConversationMember::where('id_conversation', $idConversation)
+            ->where('id_user', $idUser)
+            ->first();
+
+        if (!$existingMember) {
+            // Tạo mới ConversationMember
+            $member = new ConversationMember();
+            $member->id_conversation = $idConversation;
+            $member->id_user = $idUser;
+            $member->role = 'member'; // Mặc định là 'member'
+            $member->save();
+
+            // Thêm vào danh sách thành viên mới
+            $newMembers[] = $member;
+        }
+    }
+
+    // Trả về phản hồi thành công với danh sách thành viên đã thêm
+    return response()->json([
+        'message' => 'Thành viên đã được thêm thành công.',
+        'data' => $newMembers, // Danh sách các thành viên được thêm
+        'status' => 200
+    ], 201);
+}
+
+
     public function removeMember(Request $request)
     {
         $idConversation = $request->query('id_conversation');
@@ -76,6 +123,43 @@ class ConversationMemberController extends Controller
 
         return response()->json(['message' => 'Thành viên đã được xóa thành công.', 'status' => 200], 200);
     }
+
+    public function removeMultipleMembers(Request $request)
+{
+    // Xác thực dữ liệu đầu vào
+    $request->validate([
+        'id_conversation' => 'required|exists:conversation_ws,id',
+        'id_users' => 'required|array',
+        'id_users.*' => 'exists:users,id', // Đảm bảo từng id_user tồn tại trong bảng users
+    ]);
+
+    $idConversation = $request->id_conversation;
+    $idUsers = $request->id_users;
+
+    // Lấy danh sách thành viên cần xóa
+    $members = ConversationMember::where('id_conversation', $idConversation)
+        ->whereIn('id_user', $idUsers)
+        ->get();
+
+    if ($members->isEmpty()) {
+        return response()->json([
+            'message' => 'Không tìm thấy thành viên nào phù hợp để xóa.',
+            'status' => 404
+        ], 404);
+    }
+
+    // Xóa các thành viên được tìm thấy
+    ConversationMember::where('id_conversation', $idConversation)
+        ->whereIn('id_user', $idUsers)
+        ->delete();
+
+    return response()->json([
+        'message' => 'Các thành viên đã được xóa thành công.',
+        'removed_users' => $idUsers,
+        'status' => 200
+    ], 200);
+}
+
 
     public function getMembers(Request $request)
 {

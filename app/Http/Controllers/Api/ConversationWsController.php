@@ -111,6 +111,7 @@ class ConversationWsController extends Controller
         $validated = $request->validate([
             'name' => 'sometimes|string|max:100',
             'thumb' => 'nullable|string',
+            'id_owner' => 'sometimes',
         ]);
 
         $conversation->update($validated);
