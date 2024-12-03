@@ -44,6 +44,10 @@ return [
             'driver' => 'sanctum',
             'provider' => 'users',
         ],
+        'admin' => [
+        'driver' => 'session',  // Dùng session cho admin nếu bạn xác thực qua session
+        'provider' => 'users',  // Cung cấp thông tin người dùng từ bảng admins (hoặc bảng mà bạn tạo riêng cho admin)
+         ],
     ],
 
     /*
@@ -73,6 +77,7 @@ return [
         //     'driver' => 'database',
         //     'table' => 'users',
         // ],
+        
     ],
 
     /*

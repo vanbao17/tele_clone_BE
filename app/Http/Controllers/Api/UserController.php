@@ -43,7 +43,7 @@ class UserController extends Controller
 
      // CRUD User
 
-public function index(Request $request)
+    public function index(Request $request)
 {
     $query = User::query();
 
@@ -62,7 +62,22 @@ public function index(Request $request)
     return response()->json($users);
 }
 
-public function show($id)
+
+    public function showAll()
+{
+    $users = User::all(); // Lấy tất cả người dùng
+
+    if ($users->isEmpty()) {
+        return response()->json(['message' => 'No users found'], 404);
+    }
+
+    return response()->json([
+        'message' => 'Users retrieved successfully',
+        'users' => $users
+    ]);
+}
+
+    public function show($id)
 {
     $user = User::find($id);
 
@@ -76,28 +91,35 @@ public function show($id)
     ]);
 }
 
-public function store(Request $request)
+    public function store(Request $request)
 {
+    // Nếu không có mật khẩu trong request, mặc định là '12345678'
+    $password = $request->password ?: '12345678';  // mật khẩu mặc định
+
+    // Kiểm tra và validate dữ liệu nhập
     $request->validate([
         'name' => 'required|string|max:255',
         'email' => 'required|email|unique:users,email',
-        'password' => 'required|string|min:8',
+        'password' => 'string|min:8',
     ]);
 
     // Tạo người dùng mới
     $user = User::create([
         'name' => $request->name,
         'email' => $request->email,
-        'password' => Hash::make($request->password),
+        'password' => Hash::make($password),
+        'phoneNumber' => $request->phoneNumber,
+        'email_verified_at' => now(), // Xác nhận email ngay lập tức
     ]);
 
+    // Gửi thông báo hoặc thông tin người dùng đã được tạo thành công
     return response()->json([
         'message' => 'User created successfully',
         'user' => $user
     ], 201);
 }
 
-public function update(Request $request, $id)
+    public function update(Request $request, $id)
 {
     $user = User::find($id);
 
@@ -113,7 +135,7 @@ public function update(Request $request, $id)
     ]);
 }
 
-public function destroy($id)
+    public function destroy($id)
 {
     $user = User::find($id);
 
@@ -125,7 +147,7 @@ public function destroy($id)
     return response()->json(['message' => 'User deleted successfully']);
 }
 
-public function getTrashed()
+    public function getTrashed()
 {
     // Lấy tất cả người dùng đã bị xóa mềm
     $trashedUsers = User::onlyTrashed()->get();
@@ -136,7 +158,7 @@ public function getTrashed()
     ]);
 }
 
-public function restore($id)
+    public function restore($id)
 {
     // Tìm người dùng bị xóa mềm theo ID
     $user = User::withTrashed()->find($id);
@@ -159,7 +181,7 @@ public function restore($id)
 
 
 // Upload ảnh và lưu vào imgUrl
-public function uploadFile(Request $request, $id)
+    public function uploadFile(Request $request, $id)
 {
     // Kiểm tra xem người dùng có tồn tại hay không
     $user = User::find($id);

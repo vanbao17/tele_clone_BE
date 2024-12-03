@@ -62,5 +62,30 @@ class LoginController extends Controller
             return response()->json(['message' => 'Đã xảy ra lỗi trong quá trình xác thực.'], 500);
         }
     }
+
+   // Hàm xác thực token và kiểm tra quyền admin
+    public function checkTokenAndReturnAdmin(Request $request)
+    {
+         // Lấy token từ header Authorization
+         $token = $request->bearerToken();
+         // Nếu không có token trong header
+         if (!$token) {
+        return response()->json(['message' => 'Token không được cung cấp.'], 401);   
+        }
+    try {
+        $user = Auth::guard('sanctum')->user();
+        if (!$user) {
+            return response()->json(['message' => 'Token không hợp lệ hoặc hết hạn.'], 401);
+        }
+        if (!$user->isAdmin) {
+            return response()->json(['message' => 'Quyền truy cập bị từ chối. Người dùng không phải admin.'], 403);
+        }
+        return response()->json(['user' => $user]);
+
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'Đã xảy ra lỗi trong quá trình xác thực.'], 500);
+    }
+}
+
     
 }

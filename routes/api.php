@@ -122,18 +122,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 
-Route::prefix('crud-user')->group(function () {
-    // Lấy danh sách tất cả người dùng (có thể truy cập bởi tất cả người dùng đã đăng nhập)
-    Route::get('/users', [UserController::class, 'index']);
-    Route::get('/users/{id}', [UserController::class, 'show']);
-    // Các endpoint chỉ dành cho admin
-    Route::post('/users', [UserController::class, 'store']); // Create user
-    Route::put('/users/{id}', [UserController::class, 'update']); // Update user
-    Route::delete('/users/{id}', [UserController::class, 'destroy']); // Delete user
-    Route::get('/users/trashed/all', [UserController::class, 'getTrashed']);
-    Route::put('/users/restore/{id}', [UserController::class, 'restore']);
 
-});
 
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -141,4 +130,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('update-info/{id}', [UserController::class, 'updateUserInfo']);
     Route::post('upload-file/{id}', [UserController::class, 'uploadFile']);
     Route::get('/checkUser/user', [LoginController::class, 'checkTokenAndReturnUser']);
+    Route::get('/checkAdmin/admin', [LoginController::class, 'checkTokenAndReturnAdmin']);
+    
+});
+
+Route::get('/users', [UserController::class, 'showAll']);  // Chỉ dành cho admin
+
+Route::middleware(['auth:api', 'admin'])->group(function () {
+    Route::post('/users', [UserController::class, 'store']);  // Chỉ dành cho admin
+    Route::put('/users/{id}', [UserController::class, 'update']);  // Chỉ dành cho admin
+    Route::delete('/users/{id}', [UserController::class, 'destroy']);  // Chỉ dành cho admin
 });

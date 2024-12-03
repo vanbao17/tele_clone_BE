@@ -15,7 +15,11 @@ class ConversationWsController extends Controller
     // 1. Get all conversations
     public function index()
     {
-        $conversations = ConversationWs::where('is_deleted', false)->get();
+        // Lấy tất cả các cuộc trò chuyện chưa bị xóa và kèm theo email của người sở hữu
+        $conversations = ConversationWs::with('owner:id,email') // Tải thông tin email của người sở hữu
+            ->where('is_deleted', false) // Lọc cuộc trò chuyện chưa bị xóa
+            ->get();
+
         return response()->json($conversations);
     }
 

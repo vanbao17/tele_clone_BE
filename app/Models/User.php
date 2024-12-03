@@ -44,4 +44,9 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(ConversationMember::class, 'id_user');
     }
+
+    public function isAdmin()
+    {
+        return $this->isAdmin; // Kiểm tra trường isAdmin (boolean)
+    }
 }

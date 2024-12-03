@@ -17,4 +17,10 @@ class ConversationWs extends Model
         'thumb',
         'is_deleted',
     ];
+
+     // Quan hệ với bảng users để lấy email của người sở hữu
+     public function owner()
+     {
+         return $this->belongsTo(User::class, 'id_owner');
+     }
 }
